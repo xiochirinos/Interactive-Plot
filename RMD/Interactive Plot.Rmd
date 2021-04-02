@@ -1,0 +1,71 @@
+---
+title: "Interactive Plot"
+output: html_notebook
+---
+
+
+
+```{r}
+library(plotly)
+library(tidyverse)
+library(data.table)
+```
+
+
+```{r}
+flights_ <- read.csv("flights.csv")
+flights_
+```
+
+
+
+```{r}
+Airports_ <- read.csv("airports.csv")
+Airports_
+```
+
+```{r}
+Airlines_ <- read.csv("airlines.csv")
+Airlines_
+```
+
+```{r}
+flights_Airlines_merge <- merge(flights_, Airlines_, by.x='AIRLINE', by.y='IATA_CODE')
+```
+
+
+```{r}
+flights_Airlines_merge
+```
+
+
+```{r}
+carriers <- flights_Airlines_merge %>% group_by(AIRLINE.y) %>% summarise(count = n())
+carriers
+```
+
+```{r}
+NumberOfFlights <- ggplot(data = carriers, mapping = aes(x = AIRLINE.y, y = count)) +
+  geom_col(mapping = aes(fill = AIRLINE.y)) +
+  geom_text(mapping = aes(label = count),
+            position = position_dodge(width = 1),
+            vjust = -0.5, size = 2) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(face = "bold", size = 7, angle = 90)) +
+  theme(axis.text.y = element_text(face = "bold", size = 8)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10)) +
+  scale_y_continuous(labels = scales::number_format()) +
+  labs(title = "Number of flights per Airline (2015)",
+       subtitle = "2015 Flight Delays and Cancellations",
+       y = "Number of Flights",
+       x = "Carriers",
+       caption = "https://www.kaggle.com")
+NumberOfFlights
+
+ggplotly(NumberOfFlights)
+```
+
+
